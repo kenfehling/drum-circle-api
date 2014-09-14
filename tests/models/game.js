@@ -14,20 +14,19 @@ var GameModel = mongoose.model('Game');
 
 describe('Game', function() {
     "use strict";
-    it('#findUnicorns', function(done) {
+    it('#findByCode', function(done) {
         // test setup
-        var unicorns = [ 'unicorn1', 'unicorn2' ];
-        var query = { world: '1' };
+        var games = [ 'game1' ];
 
         // mocking MongoDB
-        sinon.stub(GameModel, 'findByCode').yields(null, unicorns);
+        sinon.stub(GameModel, 'findByCode').yields(null, games);
 
         // calling the test case
-        Game.findByCode(query, function(err, game) {
+        Game.findByCode('game1', function(err, game) {
 
             // asserting
             expect(err).to.be.null;
-            expect(game).to.eql(['unicorn1-pink', 'unicorn2-purple']);
+            expect(game).to.eql(['game1']);
 
             // as our test is asynchronous, we have to tell mocha that it is finished
             done();
