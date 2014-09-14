@@ -1,0 +1,22 @@
+{
+  "name": "drum-circle-api",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node app.js",
+    "test": "mocha --recursive tests"
+  },
+  "dependencies": {
+    "restify": "2.8.2",
+    "mongodb": "1.4.x",
+    "mongoose": "3.8.x",
+    "lodash": "2.4.x",
+    "drum-circle-library": "git+https://github.com/kenfehling/drum-circle-library.git"
+  },
+  "devDependencies": {
+    "chai": "^1.9.1",
+    "hippie": "^0.3.0",
+    "mocha": "^1.21.4",
+    "sinon": "^1.10.3"
+  }
+}
