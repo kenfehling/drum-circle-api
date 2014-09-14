@@ -22,7 +22,7 @@ describe('server', function () {
         it('returns an error if game does not exist', function (done) {
             hippie(server)
                 .json()
-                .get('/games/blah')
+                .get('/games/blahhh')
                 .expectStatus(404)
                 .end(done);
         });
@@ -33,6 +33,13 @@ describe('server', function () {
                 .json()
                 .post('/games/OPEN_SESSION/players')
                 .expectStatus(201)
+                .end(done);
+        });
+        it('does not add a player if game does not exist', function (done) {
+            hippie(server)
+                .json()
+                .post('/games/blahhh/players')
+                .expectStatus(404)
                 .end(done);
         });
     });

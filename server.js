@@ -60,8 +60,8 @@ server.get('/games/:code/players', function(req, res) {
                 res.send(players);
             });
         }
-        else if (err) {
-            res.send(err);
+        else {
+            res.send(404, { error: "Game '" + code + "' not found"});
         }
     });
 });
@@ -77,8 +77,8 @@ server.post('/games/:code/players', function(req, res) {
                 player.save();
                 res.send(201, player);
             }
-            else if (err) {
-                res.send(404, err);
+            else {
+                res.send(404, { error: "Game '" + code + "' not found"});
             }
         });
     }

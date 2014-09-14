@@ -12,6 +12,7 @@ var mongoose = require('mongoose');
 var Game = require('./../../models/Game');
 var GameModel = mongoose.model('Game');
 
+/*
 describe('Game', function() {
     "use strict";
     it('#findByCode', function(done) {
@@ -33,3 +34,4 @@ describe('Game', function() {
         });
     });
 });
+*/
