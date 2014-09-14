@@ -1,7 +1,3 @@
-These instructions have only been tested on Mac and Linux.
-I'm sure there's a way to get it running on Windows, but
-it may be simpler to just install a Linux VM.
-
 Requirements
 ------------
 

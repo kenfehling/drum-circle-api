@@ -15,10 +15,7 @@ var constants = require('drum-circle-library/constants');
 // TODO: Need different URL for development and production
 mongoose.connect('mongodb://localhost/drum-circle');
 
-// TODO: Only create open session if it doesn't exist
-var openSession = new Game({ code: constants.OPEN_SESSION_CODE });
-openSession.save();
-
+createOpenSession();
 var server = restify.createServer();
 server.use(restify.CORS());
 server.use(restify.fullResponse());
@@ -95,5 +92,15 @@ server.get('/time', function(req, res) {
         time: new Date().getTime()
     });
 });
+
+function createOpenSession() {
+    "use strict";
+    Game.findByCode(constants.OPEN_SESSION_CODE, function (err, game) {
+        if (!game) {
+            var openSession = new Game({ code: constants.OPEN_SESSION_CODE });
+            openSession.save();
+        }
+    });
+}
 
 module.exports = server;
