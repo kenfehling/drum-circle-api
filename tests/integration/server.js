@@ -1,3 +1,8 @@
+/**
+ * Integration tests for server
+ * Author: Ken Fehling
+ */
+
 /*jshint strict: true */
 /*global require, describe, it */
 
@@ -12,6 +17,22 @@ describe('server', function () {
                 .json()
                 .get('/games/OPEN_SESSION')
                 .expectStatus(200)
+                .end(done);
+        });
+        it('returns an error if game does not exist', function (done) {
+            hippie(server)
+                .json()
+                .get('/games/blah')
+                .expectStatus(404)
+                .end(done);
+        });
+    });
+    describe('/games/:code/players endpoint', function () {
+        it('adds a player if neccesary data is given', function (done) {
+            hippie(server)
+                .json()
+                .post('/games/OPEN_SESSION/players')
+                .expectStatus(201)
                 .end(done);
         });
     });

@@ -32,10 +32,10 @@ server.post('/games', function(req, res) {
     if (req.body) {
         var game = new Game(req.body);
         game.save();
-        res.send(game);
+        res.send(201, game);
     }
     else {
-        res.send("Must pass settings.");
+        res.send(400, "Must pass settings.");
     }
 });
 
@@ -47,7 +47,7 @@ server.get('/games/:code', function(req, res) {
             res.send(game);
         }
         else {
-            res.send({ error: "Game " + code + "not found"});
+            res.send(404, { error: "Game '" + code + "' not found"});
         }
     });
 });
@@ -68,21 +68,22 @@ server.get('/games/:code/players', function(req, res) {
 
 server.post('/games/:code/players', function(req, res) {
     "use strict";
-    if (req.body) {
-        Game.findByCode(req.params.code, function(err, game) {
+    var code = req.params.code;
+    if (code) {
+        Game.findByCode(code, function(err, game) {
             if (game) {
                 var options = { game: game };
                 var player = new Player(options);
                 player.save();
-                res.send(player);
+                res.send(201, player);
             }
             else if (err) {
-                res.send(err);
+                res.send(404, err);
             }
         });
     }
     else {
-        res.send("Must pass settings.");
+        res.send(400, "Must pass settings.");
     }
 });
 
