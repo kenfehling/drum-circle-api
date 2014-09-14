@@ -11,6 +11,7 @@ var mongoose = require('mongoose');
 var Game = require('./models/game');
 var Player = require('./models/player');
 var constants = require('drum-circle-library/constants');
+var Fanout = require('./services/fanout');
 
 // TODO: Need different URL for development and production
 mongoose.connect('mongodb://localhost/drum-circle');
@@ -84,6 +85,33 @@ server.post('/games/:code/players', function(req, res) {
     }
     else {
         res.send(400, "Must pass settings.");
+    }
+});
+
+server.post('/games/:code/:color/:effect', function(req, res) {
+    "use strict";
+    var code = req.params.code;
+    var color = req.params.color;
+    var effect = req.params.effect;
+    if (code && color && effect) {
+        Game.findByCode(code, function(err, game) {
+            if (game) {
+                var data = { color: color, effect: effect };
+                Fanout.send(code, data, function(result, response) {
+                    if (response.statusCode < 300) {
+                        res.send(204);
+                    } else {
+                        res.send(response.statusCode, result);
+                    }
+                });
+            }
+            else {
+                res.send(404, { error: "Game '" + code + "' not found"});
+            }
+        });
+    }
+    else {
+        res.send(400, "Must pass settings (code, color, effect)");
     }
 });
 

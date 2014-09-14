@@ -7,11 +7,13 @@
     "test": "mocha --recursive tests"
   },
   "dependencies": {
-    "restify": "2.8.2",
+    "drum-circle-library": "git+https://github.com/kenfehling/drum-circle-library.git",
+    "jwt-simple": "^0.2.0",
+    "lodash": "2.4.x",
     "mongodb": "1.4.x",
     "mongoose": "3.8.x",
-    "lodash": "2.4.x",
-    "drum-circle-library": "git+https://github.com/kenfehling/drum-circle-library.git"
+    "restify": "2.8.2",
+    "restler": "^3.2.2"
   },
   "devDependencies": {
     "chai": "^1.9.1",

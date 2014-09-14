@@ -43,4 +43,20 @@ describe('server', function () {
                 .end(done);
         });
     });
+    describe('/games/:code/:color/:effect endpoint', function () {
+        it('sends an effect if neccesary data is given', function (done) {
+            hippie(server)
+                .json()
+                .post('/games/OPEN_SESSION/red/bitcrush')
+                .expectStatus(204)
+                .end(done);
+        });
+        it('does not send effect if game does not exist', function (done) {
+            hippie(server)
+                .json()
+                .post('/games/blahhh/red/bitcrush')
+                .expectStatus(404)
+                .end(done);
+        });
+    });
 });
