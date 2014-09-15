@@ -50,6 +50,25 @@ server.post('/games', function(req, res) {
 });
 
 /**
+ * Set game settings
+ */
+server.patch('/games/:code', function(req, res) {
+    "use strict";
+    var code = req.params.code;
+    Game.findByCode(code, function(err, game) {
+        if (game) {
+            game.tempo = req.params.tempo;
+            game.drumKit = req.params.drum_kit;
+            game.save();
+            res.send(game);
+        }
+        else {
+            res.send(404, { error: "Game '" + code + "' not found"});
+        }
+    });
+});
+
+/**
  * Get game
  */
 server.get('/games/:code', function(req, res) {

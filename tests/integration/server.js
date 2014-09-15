@@ -27,6 +27,24 @@ describe('server', function () {
                 .end(done);
         });
     });
+    describe('/games/:code endpoint', function () {
+        it('sets game settings', function (done) {
+            hippie(server)
+                .json()
+                .patch('/games/OPEN_SESSION')
+                .send({ tempo: 60 })
+                .expectStatus(200)
+                .end(done);
+        });
+        it('does not set game settings if game does not exist', function (done) {
+            hippie(server)
+                .json()
+                .patch('/games/blahhh')
+                .send({ tempo: 60 })
+                .expectStatus(404)
+                .end(done);
+        });
+    });
     describe('/games/:code/players endpoint', function () {
         it('adds a player if neccesary data is given', function (done) {
             hippie(server)
