@@ -20,6 +20,8 @@ createOpenSession();
 var server = restify.createServer();
 server.use(restify.CORS());
 server.use(restify.fullResponse());
+//server.use(restify.gzipResponse());
+server.use(restify.bodyParser());
 
 /**
  * Get games
@@ -36,8 +38,9 @@ server.get('/games', function(req, res) {
  */
 server.post('/games', function(req, res) {
     "use strict";
-    if (req.body) {
-        var game = new Game(req.body);
+    var code = req.params.code;
+    if (code) {
+        var game = new Game(req.params);
         game.save();
         res.send(201, game);
     }
