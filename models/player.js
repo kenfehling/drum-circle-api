@@ -16,10 +16,18 @@ var playerSchema = new Schema({
         index: true,
         required: true
     },
-    color: String,
+    color: {
+        type: String,
+        required: true
+    },
     drum: String,
     drumKit: String,
     tempo: Number
 });
+
+playerSchema.methods.getDetails = function(cb) {
+    "use strict";
+    cb({ color: this.color });
+};
 
 module.exports = mongoose.model('Player', playerSchema).model("Player");

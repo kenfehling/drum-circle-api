@@ -20,11 +20,11 @@ function get_auth_token() {
     return jwt.encode(claim, key);
 }
 
-function send(channel, data, callback) {
+function send(channel, event, data, callback) {
     "use strict";
     var token = get_auth_token();
     var post = rest.postJson(BASE_URL + '/' + REALM + '/publish/' + channel + '/', {
-        "items": [{ "fpp": data }]
+        "items": [{ "fpp": { event: event, data: data }}]
         }, {
             headers: {
                 "Authorization": "Bearer " + token,

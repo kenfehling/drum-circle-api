@@ -21,6 +21,9 @@ var server = restify.createServer();
 server.use(restify.CORS());
 server.use(restify.fullResponse());
 
+/**
+ * Get games
+ */
 server.get('/games', function(req, res) {
     "use strict";
     Game.find(function(err, games) {
@@ -28,6 +31,9 @@ server.get('/games', function(req, res) {
     });
 });
 
+/**
+ * Create game
+ */
 server.post('/games', function(req, res) {
     "use strict";
     if (req.body) {
@@ -40,6 +46,9 @@ server.post('/games', function(req, res) {
     }
 });
 
+/**
+ * Get game
+ */
 server.get('/games/:code', function(req, res) {
     "use strict";
     var code = req.params.code;
@@ -53,9 +62,13 @@ server.get('/games/:code', function(req, res) {
     });
 });
 
+/**
+ * Get players in game
+ */
 server.get('/games/:code/players', function(req, res) {
     "use strict";
-    Game.findByCode(req.params.code, function(err, game) {
+    var code = req.params.code;
+    Game.findByCode(code, function(err, game) {
         if (game) {
             Player.where({ game: game }).find(function(err, players) {
                 res.send(players);
@@ -67,16 +80,32 @@ server.get('/games/:code/players', function(req, res) {
     });
 });
 
+/**
+ * Join a game
+ */
 server.post('/games/:code/players', function(req, res) {
     "use strict";
     var code = req.params.code;
     if (code) {
         Game.findByCode(code, function(err, game) {
             if (game) {
-                var options = { game: game };
+                var options = {
+                    game: game,
+                    color: req.params.color || game.getNextColor(),
+                    drum: req.params.drum || game.getRandomDrum()
+                };
                 var player = new Player(options);
                 player.save();
-                res.send(201, player);
+                player.getDetails(function(data) {
+                    var event = constants.EVENTS.PLAYER_JOIN;
+                    Fanout.send(code, event, data, function(result, response) {
+                        if (response.statusCode < 300) {
+                            res.send(201, player);
+                        } else {
+                            res.send(response.statusCode, result + " (Fanout)");
+                        }
+                    });
+                });
             }
             else {
                 res.send(404, { error: "Game '" + code + "' not found"});
@@ -88,6 +117,9 @@ server.post('/games/:code/players', function(req, res) {
     }
 });
 
+/**
+ * Send an effect to player
+ */
 server.post('/games/:code/:color/:effect', function(req, res) {
     "use strict";
     var code = req.params.code;
@@ -96,8 +128,9 @@ server.post('/games/:code/:color/:effect', function(req, res) {
     if (code && color && effect) {
         Game.findByCode(code, function(err, game) {
             if (game) {
+                var event = constants.EVENTS.EFFECT_RECEIVE;
                 var data = { color: color, effect: effect };
-                Fanout.send(code, data, function(result, response) {
+                Fanout.send(code, event, data, function(result, response) {
                     if (response.statusCode < 300) {
                         res.send(204);
                     } else {
@@ -115,6 +148,9 @@ server.post('/games/:code/:color/:effect', function(req, res) {
     }
 });
 
+/**
+ * Get server time
+ */
 server.get('/time', function(req, res) {
     "use strict";
     res.json({

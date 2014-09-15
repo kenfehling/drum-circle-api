@@ -21,8 +21,24 @@ var gameSchema = new Schema({
 });
 
 gameSchema.statics.findByCode = function (code, cb) {
+    "use strict";
     this.findOne({ code: code }, cb);
 };
+
+gameSchema.methods.getDetails = function(cb) {
+    "use strict";
+    cb({ code: this.code, tempo: this.tempo, drumKit: this.drumKit });
+};
+
+gameSchema.methods.getNextColor = function() {
+    "use strict";
+    return "blue";
+}
+
+gameSchema.methods.getRandomDrum = function() {
+    "use strict";
+    return "kick";
+}
 
 gameSchema.methods.getNumPlayers = function (cb) {
 
