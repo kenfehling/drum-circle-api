@@ -8,6 +8,7 @@
 
 var hippie = require('hippie');
 var server = require('../../server');
+var constants = require('drum-circle-library/constants');
 
 describe('server', function () {
     "use strict";
@@ -24,7 +25,7 @@ describe('server', function () {
         it('sets game settings', function (done) {
             hippie(server)
                 .json()
-                .patch('/games/OPEN_SESSION')
+                .patch('/games/' + constants.OPEN_SESSION_CODE)
                 .send({ tempo: 60 })
                 .expectStatus(200)
                 .end(done);
@@ -40,7 +41,7 @@ describe('server', function () {
         it('returns a game based on the code', function (done) {
             hippie(server)
                 .json()
-                .get('/games/OPEN_SESSION')
+                .get('/games/' + constants.OPEN_SESSION_CODE)
                 .expectStatus(200)
                 .end(done);
         });
@@ -56,7 +57,7 @@ describe('server', function () {
         it('adds a player if neccesary data is given', function (done) {
             hippie(server)
                 .json()
-                .post('/games/OPEN_SESSION/players')
+                .post('/games/' + constants.OPEN_SESSION_CODE + '/players')
                 .expectStatus(201)
                 .end(done);
         });
@@ -72,7 +73,7 @@ describe('server', function () {
         it('sends an effect if neccesary data is given', function (done) {
             hippie(server)
                 .json()
-                .post('/games/OPEN_SESSION/red/bitcrush')
+                .post('/games/' + constants.OPEN_SESSION_CODE + '/red/bitcrush')
                 .expectStatus(204)
                 .end(done);
         });

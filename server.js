@@ -8,13 +8,20 @@
 
 var restify = require('restify');
 var mongoose = require('mongoose');
+var autoIncrement = require('mongoose-auto-increment');
 var Game = require('./models/game');
 var Player = require('./models/player');
 var constants = require('drum-circle-library/constants');
 var Fanout = require('./services/fanout');
 
 // TODO: Need different URL for development and production
-mongoose.connect('mongodb://localhost/drum-circle');
+var connection = mongoose.connect('mongodb://localhost/drum-circle');
+
+autoIncrement.initialize(connection);
+Game.schema.plugin(autoIncrement.plugin, {
+    model: 'Game',
+    startAt: constants.OPEN_SESSION_CODE
+});
 
 createOpenSession();
 var server = restify.createServer();
@@ -39,8 +46,14 @@ server.get('/games', function(req, res) {
 server.post('/games', function(req, res) {
     "use strict";
     var game = new Game();
-    game.save();
-    res.send(201, game);
+    game.save(function(err, game) {
+        if (err) {
+            res.send(500, err.message);
+        }
+        else {
+            res.send(201, game);
+        }
+    });
 });
 
 /**
@@ -53,8 +66,14 @@ server.patch('/games/:code', function(req, res) {
         if (game) {
             game.tempo = req.params.tempo;
             game.drumKit = req.params.drum_kit;
-            game.save();
-            res.send(game);
+            game.save(function(err, game) {
+                if (err) {
+                    res.send(500, err.message);
+                }
+                else {
+                    res.send(game);
+                }
+            });
         }
         else {
             res.send(404, { error: "Game '" + code + "' not found"});
@@ -129,16 +148,22 @@ server.post('/games/:code/players', function(req, res) {
                     getDrum(game, req, function(drum) {
                         var options = { game: game, color: color, drum: drum };
                         var player = new Player(options);
-                        player.save();
-                        player.getDetails(function(data) {
-                            var event = constants.EVENTS.PLAYER_JOIN;
-                            Fanout.send(code, event, data, function(result, response) {
-                                if (response.statusCode < 300) {
-                                    res.send(201, player);
-                                } else {
-                                    res.send(response.statusCode, result + " (Fanout)");
-                                }
-                            });
+                        player.save(function(err, player) {
+                            if (err) {
+                                res.send(500, err.message);
+                            }
+                            else {
+                                player.getDetails(function(data) {
+                                    var event = constants.EVENTS.PLAYER_JOIN;
+                                    Fanout.send(code, event, data, function(result, response) {
+                                        if (response.statusCode < 300) {
+                                            res.send(201, player);
+                                        } else {
+                                            res.send(response.statusCode, result + " (Fanout)");
+                                        }
+                                    });
+                                });
+                            }
                         });
                     });
                 });
@@ -199,7 +224,11 @@ function createOpenSession() {
     Game.findByCode(constants.OPEN_SESSION_CODE, function (err, game) {
         if (!game) {
             var openSession = new Game({ code: constants.OPEN_SESSION_CODE });
-            openSession.save();
+            openSession.save(function(err, game) {
+                if (err) {
+                    console.error(err.message);
+                }
+            });
         }
     });
 }

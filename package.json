@@ -12,6 +12,7 @@
     "lodash": "2.4.x",
     "mongodb": "1.4.x",
     "mongoose": "3.8.x",
+    "mongoose-auto-increment": "^3.0.8",
     "restify": "2.8.2",
     "restler": "^3.2.2"
   },

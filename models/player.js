@@ -11,7 +11,7 @@ var Schema = mongoose.Schema;
 
 var playerSchema = new Schema({
     game: {
-        type: Schema.ObjectId,
+        type: Number,
         ref: 'games',
         index: true,
         required: true
