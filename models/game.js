@@ -14,7 +14,7 @@ var Schema = mongoose.Schema;
 
 var gameSchema = new Schema({
     _id: Number,
-    drumKit: String,
+    drum_kit: String,
     tempo: Number
 });
 
@@ -25,7 +25,7 @@ gameSchema.statics.findByCode = function (code, cb) {
 
 gameSchema.methods.getDetails = function(cb) {
     "use strict";
-    cb({ code: this._id, tempo: this.tempo, drumKit: this.drumKit });
+    cb({ code: this._id, tempo: this.tempo, drum_kit: this.drum_kit });
 };
 
 gameSchema.methods.getNextColor = function(cb) {

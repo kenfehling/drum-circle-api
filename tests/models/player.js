@@ -17,7 +17,7 @@ describe('Player', function() {
     "use strict";
     it('returns details', function(done) {
         var game = new Game({ code: 'ABC' });
-        var player = new Player({ color: 'blue', game: game });
+        var player = new Player({ game: game });
 
         expect(player.getDetails(function(details) {
             expect(details).to.eql({

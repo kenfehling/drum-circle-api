@@ -20,8 +20,11 @@ var playerSchema = new Schema({
         type: String,
         required: true
     },
-    drum: String,
-    drumKit: String,
+    drum: {
+        type: String,
+        required: true
+    },
+    drum_kit: String,
     tempo: Number
 });
 

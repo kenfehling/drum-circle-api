@@ -48,7 +48,7 @@ server.post('/games', function(req, res) {
     var game = new Game();
     game.save(function(err, game) {
         if (err) {
-            res.send(500, err.message);
+            res.send(500, err.toString());
         }
         else {
             res.send(201, game);
@@ -65,10 +65,10 @@ server.patch('/games/:code', function(req, res) {
     Game.findByCode(code, function(err, game) {
         if (game) {
             game.tempo = req.params.tempo;
-            game.drumKit = req.params.drum_kit;
+            game.drum_kit = req.params.drum_kit;
             game.save(function(err, game) {
                 if (err) {
-                    res.send(500, err.message);
+                    res.send(500, err.toString());
                 }
                 else {
                     res.send(game);
@@ -140,17 +140,23 @@ function getDrum(game, req, callback) {
  */
 server.post('/games/:code/players', function(req, res) {
     "use strict";
-    var code = req.params.code;
-    if (code) {
+    if (req.params) {
+        var code = req.params.code;
         Game.findByCode(code, function(err, game) {
             if (game) {
                 getColor(game, req, function(color)  {
                     getDrum(game, req, function(drum) {
-                        var options = { game: game, color: color, drum: drum };
+                        var options = {
+                            game: game,
+                            color: color,
+                            drum: drum,
+                            drum_kit: req.params.drum_kit || game.drum_kit,
+                            tempo: req.params.tempo || game.tempo
+                        };
                         var player = new Player(options);
                         player.save(function(err, player) {
                             if (err) {
-                                res.send(500, err.message);
+                                res.send(500, err.toString());
                             }
                             else {
                                 player.getDetails(function(data) {
@@ -226,7 +232,7 @@ function createOpenSession() {
             var openSession = new Game({ code: constants.OPEN_SESSION_CODE });
             openSession.save(function(err, game) {
                 if (err) {
-                    console.error(err.message);
+                    console.error(err.toString());
                 }
             });
         }
