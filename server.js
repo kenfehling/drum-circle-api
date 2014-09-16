@@ -38,15 +38,9 @@ server.get('/games', function(req, res) {
  */
 server.post('/games', function(req, res) {
     "use strict";
-    var code = req.params.code;
-    if (code) {
-        var game = new Game(req.params);
-        game.save();
-        res.send(201, game);
-    }
-    else {
-        res.send(400, "Must pass settings.");
-    }
+    var game = new Game();
+    game.save();
+    res.send(201, game);
 });
 
 /**
@@ -102,6 +96,26 @@ server.get('/games/:code/players', function(req, res) {
     });
 });
 
+function getColor(game, req, callback) {
+    "use strict";
+    if (req.params.color) {
+        callback(req.params.color);
+    }
+    else {
+        game.getNextColor(callback);
+    }
+}
+
+function getDrum(game, req, callback) {
+    "use strict";
+    if (req.params.drum) {
+        callback(req.params.drum);
+    }
+    else {
+        game.getRandomDrum(callback);
+    }
+}
+
 /**
  * Join a game
  */
@@ -111,21 +125,21 @@ server.post('/games/:code/players', function(req, res) {
     if (code) {
         Game.findByCode(code, function(err, game) {
             if (game) {
-                var options = {
-                    game: game,
-                    color: req.params.color || game.getNextColor(),
-                    drum: req.params.drum || game.getRandomDrum()
-                };
-                var player = new Player(options);
-                player.save();
-                player.getDetails(function(data) {
-                    var event = constants.EVENTS.PLAYER_JOIN;
-                    Fanout.send(code, event, data, function(result, response) {
-                        if (response.statusCode < 300) {
-                            res.send(201, player);
-                        } else {
-                            res.send(response.statusCode, result + " (Fanout)");
-                        }
+                getColor(game, req, function(color)  {
+                    getDrum(game, req, function(drum) {
+                        var options = { game: game, color: color, drum: drum };
+                        var player = new Player(options);
+                        player.save();
+                        player.getDetails(function(data) {
+                            var event = constants.EVENTS.PLAYER_JOIN;
+                            Fanout.send(code, event, data, function(result, response) {
+                                if (response.statusCode < 300) {
+                                    res.send(201, player);
+                                } else {
+                                    res.send(response.statusCode, result + " (Fanout)");
+                                }
+                            });
+                        });
                     });
                 });
             }

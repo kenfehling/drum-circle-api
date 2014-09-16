@@ -12,18 +12,11 @@ var server = require('../../server');
 describe('server', function () {
     "use strict";
     describe('/games endpoint', function () {
-        it('returns a game based on the code', function (done) {
+        it('creates a game', function (done) {
             hippie(server)
                 .json()
-                .get('/games/OPEN_SESSION')
-                .expectStatus(200)
-                .end(done);
-        });
-        it('returns an error if game does not exist', function (done) {
-            hippie(server)
-                .json()
-                .get('/games/blahhh')
-                .expectStatus(404)
+                .post('/games')
+                .expectStatus(201)
                 .end(done);
         });
     });
@@ -41,6 +34,20 @@ describe('server', function () {
                 .json()
                 .patch('/games/blahhh')
                 .send({ tempo: 60 })
+                .expectStatus(404)
+                .end(done);
+        });
+        it('returns a game based on the code', function (done) {
+            hippie(server)
+                .json()
+                .get('/games/OPEN_SESSION')
+                .expectStatus(200)
+                .end(done);
+        });
+        it('returns an error if game does not exist', function (done) {
+            hippie(server)
+                .json()
+                .get('/games/blahhh')
                 .expectStatus(404)
                 .end(done);
         });
