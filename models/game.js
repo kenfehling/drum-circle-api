@@ -30,19 +30,19 @@ gameSchema.methods.getDetails = function(cb) {
 
 gameSchema.methods.getNextColor = function(cb) {
     "use strict";
-    this.getNumPlayers(function(numPlayers) {
-        cb(constants.PLAYER_COLORS[numPlayers]);
+    this.getNumPlayers(function(err, numPlayers) {
+        cb(err, constants.PLAYER_COLORS[numPlayers]);
     });
 };
 
 gameSchema.methods.getRandomDrum = function(cb) {
     "use strict";
-    cb("kick");
+    cb(null, "kick");
 };
 
 gameSchema.methods.getNumPlayers = function (cb) {
     "use strict";
-    cb(0);
+    cb(null, 0);
 };
 
 module.exports = mongoose.model('Game', gameSchema).model('Game');

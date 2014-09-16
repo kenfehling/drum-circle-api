@@ -118,7 +118,7 @@ server.get('/games/:code/players', function(req, res) {
 function getColor(game, req, callback) {
     "use strict";
     if (req.params.color) {
-        callback(req.params.color);
+        callback(null, req.params.color);
     }
     else {
         game.getNextColor(callback);
@@ -128,7 +128,7 @@ function getColor(game, req, callback) {
 function getDrum(game, req, callback) {
     "use strict";
     if (req.params.drum) {
-        callback(req.params.drum);
+        callback(null, req.params.drum);
     }
     else {
         game.getRandomDrum(callback);
@@ -144,8 +144,8 @@ server.post('/games/:code/players', function(req, res) {
         var code = req.params.code;
         Game.findByCode(code, function(err, game) {
             if (game) {
-                getColor(game, req, function(color)  {
-                    getDrum(game, req, function(drum) {
+                getColor(game, req, function(err, color)  {
+                    getDrum(game, req, function(err, drum) {
                         var options = {
                             game: game,
                             color: color,
