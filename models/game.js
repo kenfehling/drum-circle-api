@@ -13,6 +13,7 @@ var utils = require('drum-circle-library/utils');
 var Schema = mongoose.Schema;
 
 var gameSchema = new Schema({
+    _id: Number,
     drumKit: String,
     tempo: Number
 });
