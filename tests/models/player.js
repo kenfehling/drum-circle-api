@@ -54,12 +54,16 @@ describe('Player', function() {
     });
 
     it('returns details', function(done) {
-        var player = new db.models.Player({ game: game, color: 'blue' });
-        expect(player.getDetails(function(details) {
+        var player = new db.models.Player({
+            game: game,
+            color: 'red',
+            drum: 'kick'
+        });
+        player.getDetails(function(details) {
             expect(details).to.eql({
-                color: 'blue'
+                color: 'red'
             });
-        }));
-        done();
+            done();
+        });
     });
 });

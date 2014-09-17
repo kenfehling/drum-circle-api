@@ -46,7 +46,7 @@ gameSchema.methods.getRandomDrum = function(cb) {
 
 gameSchema.methods.getNumPlayers = function (cb) {
     "use strict";
-    cb(null, 0);
+    mongoose.models.Player.count({}, cb);
 };
 
 module.exports = mongoose.model('Game', gameSchema).model('Game');

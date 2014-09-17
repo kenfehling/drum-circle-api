@@ -13,6 +13,7 @@ var db = require('../../services/database');
 
 describe('Game', function() {
     "use strict";
+    var game;
 
     before(function() {
         db.connect('mongodb://localhost/test');
@@ -22,13 +23,37 @@ describe('Game', function() {
         db.close();
     });
 
-    it('creates a game successfully', function(done) {
-        // test setup
-        var game = new db.models.Game();
+    beforeEach(function(done) {
+        game = new db.models.Game();
         game.save(function(err, game) {
             expect(err).to.be.null;
             expect(game).to.not.be.undefined;
             done();
+        });
+    });
+
+    it('gets zero players when nobody joined', function(done) {
+        game.getNumPlayers(function(err, numPlayers) {
+            expect(err).to.be.null;
+            expect(numPlayers).to.not.be.undefined;
+            expect(numPlayers).to.equal(0);
+            done();
+        });
+    });
+
+    it('gets one player when player has joined', function(done) {
+        var player = new db.models.Player({
+            game: game,
+            color: 'red',
+            drum: 'kick'
+        });
+        player.save(function(err, player) {
+            expect(err).to.be.null;
+            expect(player).to.not.be.undefined;
+            game.getNumPlayers(function(err, numPlayers) {
+                expect(numPlayers).to.equal(1);
+                done();
+            });
         });
     });
 });
