@@ -49,6 +49,22 @@ server.post('/games', function(req, res) {
 });
 
 /**
+ * Delete game
+ */
+server.del('games/:code', function(req, res) {
+    "use strict";
+    var code = req.params.code;
+    db.models.Game.findOneAndRemove(code, function(err, game) {
+        if (game) {
+            res.send(game);
+        }
+        else {
+            res.send(404, { error: "db.models.Game '" + code + "' not found"});
+        }
+    });
+});
+
+/**
  * Set game settings
  */
 server.patch('/games/:code', function(req, res) {
@@ -106,26 +122,6 @@ server.get('/games/:code/players', function(req, res) {
         }
     });
 });
-
-function getColor(game, req, callback) {
-    "use strict";
-    if (req.params.color) {
-        callback(null, req.params.color);
-    }
-    else {
-        game.getNextColor(callback);
-    }
-}
-
-function getDrum(game, req, callback) {
-    "use strict";
-    if (req.params.drum) {
-        callback(null, req.params.drum);
-    }
-    else {
-        game.getRandomDrum(callback);
-    }
-}
 
 /**
  * Join a game
@@ -216,6 +212,26 @@ server.get('/time', function(req, res) {
         time: new Date().getTime()
     });
 });
+
+function getColor(game, req, callback) {
+    "use strict";
+    if (req.params.color) {
+        callback(null, req.params.color);
+    }
+    else {
+        game.getNextColor(callback);
+    }
+}
+
+function getDrum(game, req, callback) {
+    "use strict";
+    if (req.params.drum) {
+        callback(null, req.params.drum);
+    }
+    else {
+        game.getRandomDrum(callback);
+    }
+}
 
 function createOpenSession() {
     "use strict";

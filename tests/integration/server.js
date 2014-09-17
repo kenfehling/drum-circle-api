@@ -4,28 +4,52 @@
  */
 
 /*jshint strict: true */
-/*global require, describe, it */
+/*global require, describe, it, before, beforeEach */
 
 var hippie = require('hippie');
 var server = require('../../server');
 var constants = require('drum-circle-library/constants');
+var TEST_GAME_CODE = 44;
 
 describe('server', function () {
     "use strict";
+
+    function createGame(callback) {
+        hippie(server)
+            .json()
+            .post('/games')
+            .expectStatus(201)
+            .end(function(err, res, body) {
+                callback(body._id);
+            });
+    }
+
     describe('/games endpoint', function () {
         it('creates a game', function (done) {
-            hippie(server)
-                .json()
-                .post('/games')
-                .expectStatus(201)
-                .end(done);
+            createGame(function() {
+                done();
+            });
         });
     });
     describe('/games/:code endpoint', function () {
+        var gameCode;
+        beforeEach(function(done) {
+            createGame(function(code) {
+                gameCode = code;
+                done();
+            });
+        });
+        it('deletes a game', function (done) {
+            hippie(server)
+                .json()
+                .del('/games/' + gameCode)
+                .expectStatus(200)
+                .end(done);
+        });
         it('sets game settings', function (done) {
             hippie(server)
                 .json()
-                .patch('/games/' + constants.OPEN_SESSION_CODE)
+                .patch('/games/' + gameCode)
                 .send({ tempo: 60 })
                 .expectStatus(200)
                 .end(done);
@@ -41,7 +65,7 @@ describe('server', function () {
         it('returns a game based on the code', function (done) {
             hippie(server)
                 .json()
-                .get('/games/' + constants.OPEN_SESSION_CODE)
+                .get('/games/' + gameCode)
                 .expectStatus(200)
                 .end(done);
         });
@@ -54,10 +78,17 @@ describe('server', function () {
         });
     });
     describe('/games/:code/players endpoint', function () {
+        var gameCode;
+        beforeEach(function(done) {
+            createGame(function(code) {
+                gameCode = code;
+                done();
+            });
+        });
         it('adds a player if neccesary data is given', function (done) {
             hippie(server)
                 .json()
-                .post('/games/' + constants.OPEN_SESSION_CODE + '/players')
+                .post('/games/' + gameCode + '/players')
                 .expectStatus(201)
                 .end(done);
         });
@@ -70,10 +101,17 @@ describe('server', function () {
         });
     });
     describe('/games/:code/:color/:effect endpoint', function () {
+        var gameCode;
+        beforeEach(function(done) {
+            createGame(function(code) {
+                gameCode = code;
+                done();
+            });
+        });
         it('sends an effect if neccesary data is given', function (done) {
             hippie(server)
                 .json()
-                .post('/games/' + constants.OPEN_SESSION_CODE + '/red/bitcrush')
+                .post('/games/' + gameCode + '/red/bitcrush')
                 .expectStatus(204)
                 .end(done);
         });
