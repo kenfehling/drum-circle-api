@@ -7,13 +7,17 @@
 /*global require, module, exports */
 
 var mongoose = require('mongoose');
-var autoIncrement = require('mongoose-auto-increment');
 var constants = require('drum-circle-library/constants');
 var utils = require('drum-circle-library/utils');
 var Schema = mongoose.Schema;
 
 var gameSchema = new Schema({
-    _id: Number,
+    _id: {
+        type: Number,
+        index: true,
+        required: true,
+        unique: true
+    },
     drum_kit: String,
     tempo: Number
 });

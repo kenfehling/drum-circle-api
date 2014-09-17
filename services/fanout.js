@@ -4,7 +4,7 @@
  */
 
 /*jshint strict: true */
-/*global require, module, exports, Buffer */
+/*global require, module, Buffer */
 
 var jwt = require('jwt-simple');
 var rest = require('restler');

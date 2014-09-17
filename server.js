@@ -8,20 +8,12 @@
 
 var restify = require('restify');
 var mongoose = require('mongoose');
-var autoIncrement = require('mongoose-auto-increment');
-var Game = require('./models/game');
-var Player = require('./models/player');
 var constants = require('drum-circle-library/constants');
 var Fanout = require('./services/fanout');
+var db = require('./services/database');
 
 // TODO: Need different URL for development and production
-var connection = mongoose.connect('mongodb://localhost/drum-circle');
-
-autoIncrement.initialize(connection);
-Game.schema.plugin(autoIncrement.plugin, {
-    model: 'Game',
-    startAt: constants.OPEN_SESSION_CODE
-});
+db.connect('mongodb://localhost/drum-circle');
 
 createOpenSession();
 var server = restify.createServer();
@@ -35,7 +27,7 @@ server.use(restify.bodyParser());
  */
 server.get('/games', function(req, res) {
     "use strict";
-    Game.find(function(err, games) {
+    db.models.Game.find(function(err, games) {
         res.send(games);
     });
 });
@@ -45,7 +37,7 @@ server.get('/games', function(req, res) {
  */
 server.post('/games', function(req, res) {
     "use strict";
-    var game = new Game();
+    var game = new db.models.Game();
     game.save(function(err, game) {
         if (err) {
             res.send(500, err.toString());
@@ -62,7 +54,7 @@ server.post('/games', function(req, res) {
 server.patch('/games/:code', function(req, res) {
     "use strict";
     var code = req.params.code;
-    Game.findByCode(code, function(err, game) {
+    db.models.Game.findByCode(code, function(err, game) {
         if (game) {
             game.tempo = req.params.tempo;
             game.drum_kit = req.params.drum_kit;
@@ -76,7 +68,7 @@ server.patch('/games/:code', function(req, res) {
             });
         }
         else {
-            res.send(404, { error: "Game '" + code + "' not found"});
+            res.send(404, { error: "db.models.Game '" + code + "' not found"});
         }
     });
 });
@@ -87,12 +79,12 @@ server.patch('/games/:code', function(req, res) {
 server.get('/games/:code', function(req, res) {
     "use strict";
     var code = req.params.code;
-    Game.findByCode(code, function(err, game) {
+    db.models.Game.findByCode(code, function(err, game) {
         if (game) {
             res.send(game);
         }
         else {
-            res.send(404, { error: "Game '" + code + "' not found"});
+            res.send(404, { error: "db.models.Game '" + code + "' not found"});
         }
     });
 });
@@ -103,14 +95,14 @@ server.get('/games/:code', function(req, res) {
 server.get('/games/:code/players', function(req, res) {
     "use strict";
     var code = req.params.code;
-    Game.findByCode(code, function(err, game) {
+    db.models.Game.findByCode(code, function(err, game) {
         if (game) {
-            Player.where({ game: game }).find(function(err, players) {
+            db.models.Player.where({ game: game }).find(function(err, players) {
                 res.send(players);
             });
         }
         else {
-            res.send(404, { error: "Game '" + code + "' not found"});
+            res.send(404, { error: "db.models.Game '" + code + "' not found"});
         }
     });
 });
@@ -142,7 +134,7 @@ server.post('/games/:code/players', function(req, res) {
     "use strict";
     if (req.params) {
         var code = req.params.code;
-        Game.findByCode(code, function(err, game) {
+        db.models.Game.findByCode(code, function(err, game) {
             if (game) {
                 getColor(game, req, function(err, color)  {
                     getDrum(game, req, function(err, drum) {
@@ -153,7 +145,7 @@ server.post('/games/:code/players', function(req, res) {
                             drum_kit: req.params.drum_kit || game.drum_kit,
                             tempo: req.params.tempo || game.tempo
                         };
-                        var player = new Player(options);
+                        var player = new db.models.Player(options);
                         player.save(function(err, player) {
                             if (err) {
                                 res.send(500, err.toString());
@@ -175,7 +167,7 @@ server.post('/games/:code/players', function(req, res) {
                 });
             }
             else {
-                res.send(404, { error: "Game '" + code + "' not found"});
+                res.send(404, { error: "db.models.Game '" + code + "' not found"});
             }
         });
     }
@@ -193,7 +185,7 @@ server.post('/games/:code/:color/:effect', function(req, res) {
     var color = req.params.color;
     var effect = req.params.effect;
     if (code && color && effect) {
-        Game.findByCode(code, function(err, game) {
+        db.models.Game.findByCode(code, function(err, game) {
             if (game) {
                 var event = constants.EVENTS.EFFECT_RECEIVE;
                 var data = { color: color, effect: effect };
@@ -206,7 +198,7 @@ server.post('/games/:code/:color/:effect', function(req, res) {
                 });
             }
             else {
-                res.send(404, { error: "Game '" + code + "' not found"});
+                res.send(404, { error: "db.models.Game '" + code + "' not found"});
             }
         });
     }
@@ -227,9 +219,9 @@ server.get('/time', function(req, res) {
 
 function createOpenSession() {
     "use strict";
-    Game.findByCode(constants.OPEN_SESSION_CODE, function (err, game) {
+    db.models.Game.findByCode(constants.OPEN_SESSION_CODE, function (err, game) {
         if (!game) {
-            var openSession = new Game({ code: constants.OPEN_SESSION_CODE });
+            var openSession = new db.models.Game({ code: constants.OPEN_SESSION_CODE });
             openSession.save(function(err, game) {
                 if (err) {
                     console.error(err.toString());

@@ -4,25 +4,31 @@
  */
 
 /*jshint strict: true */
-/*global require, describe, it */
+/*global require, describe, it, before, after, beforeEach */
 
 var sinon = require('sinon');
 var expect = require('chai').expect;
-var mongoose = require('mongoose');
-var autoIncrement = require('mongoose-auto-increment');
-var Game = require('./../../models/Game');
-var GameModel = mongoose.model('Game');
+var constants = require('drum-circle-library/constants');
+var db = require('../../services/database');
 
 describe('Game', function() {
     "use strict";
-    it('creates a game with an _id', function(done) {
+
+    before(function() {
+        db.connect('mongodb://localhost/drum-circle');
+    });
+
+    after(function() {
+        db.close();
+    });
+
+    it('creates a game successfully', function(done) {
         // test setup
-        var game = new Game();
-
-        // asserting
-        expect(game._id).to.not.be.undefined;
-
-        // as our test is asynchronous, we have to tell mocha that it is finished
-        done();
+        var game = new db.models.Game();
+        game.save(function(err, game) {
+            expect(err).to.be.null;
+            expect(game).to.not.be.undefined;
+            done();
+        });
     });
 });
