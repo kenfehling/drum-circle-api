@@ -15,7 +15,7 @@ describe('Game', function() {
     "use strict";
 
     before(function() {
-        db.connect('mongodb://localhost/drum-circle');
+        db.connect('mongodb://localhost/test');
     });
 
     after(function() {

@@ -15,7 +15,7 @@ describe('Player', function() {
     var game;
 
     before(function() {
-        db.connect('mongodb://localhost/drum-circle');
+        db.connect('mongodb://localhost/test');
     });
 
     after(function() {
