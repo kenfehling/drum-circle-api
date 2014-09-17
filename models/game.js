@@ -35,7 +35,7 @@ gameSchema.methods.getDetails = function(cb) {
 gameSchema.methods.getNextColor = function(cb) {
     "use strict";
     this.getNumPlayers(function(err, numPlayers) {
-        cb(err, constants.PLAYER_COLORS[numPlayers]);
+        cb(err, constants.PLAYER_COLORS[numPlayers % constants.MAX_PLAYERS]);
     });
 };
 
@@ -46,7 +46,7 @@ gameSchema.methods.getRandomDrum = function(cb) {
 
 gameSchema.methods.getNumPlayers = function (cb) {
     "use strict";
-    mongoose.models.Player.count({}, cb);
+    mongoose.models.Player.count({ game: this._id }, cb);
 };
 
 module.exports = mongoose.model('Game', gameSchema).model('Game');

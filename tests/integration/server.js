@@ -9,7 +9,6 @@
 var hippie = require('hippie');
 var server = require('../../server');
 var constants = require('drum-circle-library/constants');
-var TEST_GAME_CODE = 44;
 
 describe('server', function () {
     "use strict";
