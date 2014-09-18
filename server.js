@@ -83,7 +83,7 @@ server.patch('/games/:code', function(req, res) {
                 }
                 else {
                     if (game.running) {
-                        var event = constants.EVENTS.START_GAME;
+                        var event = constants.EVENTS.GAME_STARTED;
                         Fanout.send(code, event, game, function(result, response) {
                             if (response.statusCode < 300) {
                                 res.send(game);
