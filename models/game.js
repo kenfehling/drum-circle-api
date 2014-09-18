@@ -27,11 +27,6 @@ var gameSchema = new Schema({
     tempo: Number
 });
 
-gameSchema.statics.findByCode = function (code, cb) {
-    "use strict";
-    this.findById(code, cb);
-};
-
 gameSchema.methods.getNextColor = function(cb) {
     "use strict";
     this.getNumPlayers(function(err, numPlayers) {

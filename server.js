@@ -51,15 +51,15 @@ server.post('/games', function(req, res) {
 /**
  * Delete game
  */
-server.del('games/:code', function(req, res) {
+server.del('games/:_id', function(req, res) {
     "use strict";
-    var code = req.params.code;
-    db.models.Game.findOneAndRemove(code, function(err, game) {
+    var _id = req.params._id;
+    db.models.Game.findOneAndRemove(_id, function(err, game) {
         if (game) {
             res.send(game);
         }
         else {
-            res.send(404, { error: "db.models.Game '" + code + "' not found"});
+            res.send(404, { error: "db.models.Game '" + _id + "' not found"});
         }
     });
 });
@@ -69,8 +69,8 @@ server.del('games/:code', function(req, res) {
  */
 server.patch('/games/:code', function(req, res) {
     "use strict";
-    var code = req.params.code;
-    db.models.Game.findByCode(code, function(err, game) {
+    var _id = req.params.code;
+    db.models.Game.findById(_id, function(err, game) {
         if (game) {
             game.tempo = req.params.tempo;
             game.drum_kit = req.params.drum_kit;
@@ -84,7 +84,7 @@ server.patch('/games/:code', function(req, res) {
                 else {
                     if (game.running) {
                         var event = constants.EVENTS.GAME_STARTED;
-                        Fanout.send(code, event, game, function(result, response) {
+                        Fanout.send(_id, event, game, function(result, response) {
                             if (response.statusCode < 300) {
                                 res.send(game);
                             } else {
@@ -99,7 +99,7 @@ server.patch('/games/:code', function(req, res) {
             });
         }
         else {
-            res.send(404, { error: "db.models.Game '" + code + "' not found"});
+            res.send(404, { error: "db.models.Game '" + _id + "' not found"});
         }
     });
 });
@@ -109,13 +109,13 @@ server.patch('/games/:code', function(req, res) {
  */
 server.get('/games/:code', function(req, res) {
     "use strict";
-    var code = req.params.code;
-    db.models.Game.findByCode(code, function(err, game) {
+    var _id = req.params.code;
+    db.models.Game.findById(_id, function(err, game) {
         if (game) {
             res.send(game);
         }
         else {
-            res.send(404, { error: "db.models.Game '" + code + "' not found"});
+            res.send(404, { error: "db.models.Game '" + _id + "' not found"});
         }
     });
 });
@@ -125,15 +125,15 @@ server.get('/games/:code', function(req, res) {
  */
 server.get('/games/:code/players', function(req, res) {
     "use strict";
-    var code = req.params.code;
-    db.models.Game.findByCode(code, function(err, game) {
+    var _id = req.params.code;
+    db.models.Game.findById(_id, function(err, game) {
         if (game) {
             db.models.Player.where({ game: game }).find(function(err, players) {
                 res.send(players);
             });
         }
         else {
-            res.send(404, { error: "db.models.Game '" + code + "' not found"});
+            res.send(404, { error: "db.models.Game '" + _id + "' not found"});
         }
     });
 });
@@ -144,8 +144,8 @@ server.get('/games/:code/players', function(req, res) {
 server.post('/games/:code/players', function(req, res) {
     "use strict";
     if (req.params) {
-        var code = req.params.code;
-        db.models.Game.findByCode(code, function(err, game) {
+        var _id = req.params.code;
+        db.models.Game.findById(_id, function(err, game) {
             if (game) {
                 getColor(game, req, function(err, color)  {
                     getDrum(game, req, function(err, drum) {
@@ -163,7 +163,7 @@ server.post('/games/:code/players', function(req, res) {
                             }
                             else {
                                 var event = constants.EVENTS.PLAYER_JOIN;
-                                Fanout.send(code, event, player, function(result, response) {
+                                Fanout.send(_id, event, player, function(result, response) {
                                     if (response.statusCode < 300) {
                                         res.send(201, player);
                                     } else {
@@ -176,7 +176,7 @@ server.post('/games/:code/players', function(req, res) {
                 });
             }
             else {
-                res.send(404, { error: "db.models.Game '" + code + "' not found"});
+                res.send(404, { error: "db.models.Game '" + _id + "' not found"});
             }
         });
     }
@@ -190,15 +190,15 @@ server.post('/games/:code/players', function(req, res) {
  */
 server.post('/games/:code/:color/:effect', function(req, res) {
     "use strict";
-    var code = req.params.code;
+    var _id = req.params.code;
     var color = req.params.color;
     var effect = req.params.effect;
-    if (code && color && effect) {
-        db.models.Game.findByCode(code, function(err, game) {
+    if (_id && color && effect) {
+        db.models.Game.findById(_id, function(err, game) {
             if (game) {
                 var event = constants.EVENTS.EFFECT_RECEIVE;
                 var data = { color: color, effect: effect };
-                Fanout.send(code, event, data, function(result, response) {
+                Fanout.send(_id, event, data, function(result, response) {
                     if (response.statusCode < 300) {
                         res.send(204);
                     } else {
@@ -207,12 +207,12 @@ server.post('/games/:code/:color/:effect', function(req, res) {
                 });
             }
             else {
-                res.send(404, { error: "db.models.Game '" + code + "' not found"});
+                res.send(404, { error: "db.models.Game '" + _id + "' not found"});
             }
         });
     }
     else {
-        res.send(400, "Must pass settings (code, color, effect)");
+        res.send(400, "Must pass settings (_id, color, effect)");
     }
 });
 
@@ -248,9 +248,9 @@ function getDrum(game, req, callback) {
 
 function createOpenSession() {
     "use strict";
-    db.models.Game.findByCode(constants.OPEN_SESSION_CODE, function (err, game) {
+    db.models.Game.findById(constants.OPEN_SESSION_CODE, function (err, game) {
         if (!game) {
-            var openSession = new db.models.Game({ code: constants.OPEN_SESSION_CODE });
+            var openSession = new db.models.Game({ _id: constants.OPEN_SESSION_CODE });
             openSession.save(function(err, game) {
                 if (err) {
                     console.error(err.toString());
