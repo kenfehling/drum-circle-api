@@ -74,12 +74,27 @@ server.patch('/games/:code', function(req, res) {
         if (game) {
             game.tempo = req.params.tempo;
             game.drum_kit = req.params.drum_kit;
+            if (req.params.running) {
+                game.running = req.params.running;
+            }
             game.save(function(err, game) {
                 if (err) {
                     res.send(500, err.toString());
                 }
                 else {
-                    res.send(game);
+                    if (game.running) {
+                        var event = constants.EVENTS.START_GAME;
+                        Fanout.send(code, event, game, function(result, response) {
+                            if (response.statusCode < 300) {
+                                res.send(game);
+                            } else {
+                                res.send(response.statusCode, result + " (Fanout)");
+                            }
+                        });
+                    }
+                    else {
+                        res.send(game);
+                    }
                 }
             });
         }
@@ -147,15 +162,13 @@ server.post('/games/:code/players', function(req, res) {
                                 res.send(500, err.toString());
                             }
                             else {
-                                player.getDetails(function(data) {
-                                    var event = constants.EVENTS.PLAYER_JOIN;
-                                    Fanout.send(code, event, data, function(result, response) {
-                                        if (response.statusCode < 300) {
-                                            res.send(201, player);
-                                        } else {
-                                            res.send(response.statusCode, result + " (Fanout)");
-                                        }
-                                    });
+                                var event = constants.EVENTS.PLAYER_JOIN;
+                                Fanout.send(code, event, player, function(result, response) {
+                                    if (response.statusCode < 300) {
+                                        res.send(201, player);
+                                    } else {
+                                        res.send(response.statusCode, result + " (Fanout)");
+                                    }
                                 });
                             }
                         });

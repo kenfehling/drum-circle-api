@@ -28,9 +28,4 @@ var playerSchema = new Schema({
     tempo: Number
 });
 
-playerSchema.methods.getDetails = function(cb) {
-    "use strict";
-    cb({ color: this.color });
-};
-
 module.exports = mongoose.model('Player', playerSchema).model("Player");

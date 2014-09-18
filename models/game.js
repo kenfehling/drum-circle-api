@@ -18,6 +18,11 @@ var gameSchema = new Schema({
         required: true,
         unique: true
     },
+    running: {
+        type: Boolean,
+        required: true,
+        default: false
+    },
     drum_kit: String,
     tempo: Number
 });
@@ -25,11 +30,6 @@ var gameSchema = new Schema({
 gameSchema.statics.findByCode = function (code, cb) {
     "use strict";
     this.findById(code, cb);
-};
-
-gameSchema.methods.getDetails = function(cb) {
-    "use strict";
-    cb({ code: this._id, tempo: this.tempo, drum_kit: this.drum_kit });
 };
 
 gameSchema.methods.getNextColor = function(cb) {

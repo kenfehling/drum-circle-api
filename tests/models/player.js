@@ -52,18 +52,4 @@ describe('Player', function() {
             done();
         });
     });
-
-    it('returns details', function(done) {
-        var player = new db.models.Player({
-            game: game,
-            color: 'red',
-            drum: 'kick'
-        });
-        player.getDetails(function(details) {
-            expect(details).to.eql({
-                color: 'red'
-            });
-            done();
-        });
-    });
 });

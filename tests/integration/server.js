@@ -53,6 +53,14 @@ describe('server', function () {
                 .expectStatus(200)
                 .end(done);
         });
+        it('sets game settings and starts game', function (done) {
+            hippie(server)
+                .json()
+                .patch('/games/' + gameCode)
+                .send({ tempo: 60, running: true })
+                .expectStatus(200)
+                .end(done);
+        });
         it('does not set game settings if game does not exist', function (done) {
             hippie(server)
                 .json()
