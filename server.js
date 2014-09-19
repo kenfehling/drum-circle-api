@@ -4,7 +4,7 @@
  */
 
 /*jshint strict: true */
-/*global require, module, exports, console */
+/*global require, module, exports, console, process */
 
 var restify = require('restify');
 var mongoose = require('mongoose');
@@ -12,8 +12,13 @@ var constants = require('drum-circle-library/constants');
 var Fanout = require('./services/fanout');
 var db = require('./services/database');
 
-// TODO: Need different URL for development and production
-db.connect('mongodb://localhost/drum-circle');
+// Use different URL for development and production
+if (process.env.MONGOHQ_URL) {
+    mongoose.connect(process.env.MONGOHQ_URL);
+}
+else {
+    db.connect('mongodb://localhost/drum-circle');
+}
 
 createOpenSession();
 var server = restify.createServer();
