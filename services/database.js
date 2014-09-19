@@ -19,7 +19,6 @@ function connect(url) {
         model: 'Game',
         startAt: constants.OPEN_SESSION_CODE
     });
-    console.log("Auto increment is on");
 }
 
 function close() {

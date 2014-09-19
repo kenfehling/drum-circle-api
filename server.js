@@ -14,7 +14,7 @@ var db = require('./services/database');
 
 // Use different URL for development and production
 if (process.env.MONGOHQ_URL) {
-    mongoose.connect(process.env.MONGOHQ_URL);
+    db.connect(process.env.MONGOHQ_URL);
 }
 else {
     db.connect('mongodb://localhost/drum-circle');
