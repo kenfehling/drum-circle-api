@@ -8,13 +8,13 @@
   },
   "dependencies": {
     "drum-circle-library": "git+https://github.com/kenfehling/drum-circle-library.git",
-    "jwt-simple": "^0.2.0",
+    "jwt-simple": "0.2.x",
     "lodash": "2.4.x",
     "mongodb": "1.4.x",
     "mongoose": "3.8.x",
-    "mongoose-auto-increment": "^3.0.8",
+    "mongoose-auto-increment": "3.0.x",
     "restify": "2.8.2",
-    "restler": "^3.2.2"
+    "restler": "3.2.x"
   },
   "devDependencies": {
     "chai": "^1.9.1",
