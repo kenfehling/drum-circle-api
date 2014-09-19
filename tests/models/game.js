@@ -44,8 +44,8 @@ describe('Game', function() {
     it('gets one player when player has joined', function(done) {
         var player = new db.models.Player({
             game: game,
-            color: 'red',
-            drum: 'kick'
+            color: constants.PLAYER_COLORS[0],
+            drum: constants.DRUM_KITS[0].drums[0]
         });
         player.save(function(err, player) {
             expect(err).to.be.null;
@@ -54,6 +54,49 @@ describe('Game', function() {
                 expect(numPlayers).to.equal(1);
                 done();
             });
+        });
+    });
+
+    it('gets a list of drums in use', function(done) {
+        var player = new db.models.Player({
+            game: game,
+            color: constants.PLAYER_COLORS[0],
+            drum: constants.DRUM_KITS[0].drums[0]
+        });
+        player.save(function(err, player) {
+            expect(err).to.be.null;
+            expect(player).to.not.be.undefined;
+            game.getUsedDrums(function(err, drums) {
+                expect(err).to.be.null;
+                expect(drums.length).to.equal(1);
+                expect(drums[0]).to.equal(constants.DRUM_KITS[0].drums[0]);
+                done();
+            });
+        });
+    });
+
+    it('gets a list of drums not in use', function(done) {
+        var player = new db.models.Player({
+            game: game,
+            color: constants.PLAYER_COLORS[0],
+            drum: constants.DRUM_KITS[0].drums[0]
+        });
+        player.save(function(err, player) {
+            expect(err).to.be.null;
+            expect(player).to.not.be.undefined;
+            game.getUnusedDrums(function(err, drums) {
+                expect(err).to.be.null;
+                expect(drums.length).to.equal(constants.DRUM_KITS[0].drums.length - 1);
+                done();
+            });
+        });
+    });
+
+    it('selects a random drum', function(done) {
+        game.selectRandomDrum(function(err, drum) {
+            expect(err).to.be.null;
+            expect(drum).to.not.be.null;
+            done();
         });
     });
 });

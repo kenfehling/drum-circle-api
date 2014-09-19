@@ -9,6 +9,7 @@
 var sinon = require('sinon');
 var expect = require('chai').expect;
 var db = require('../../services/database');
+var constants = require('drum-circle-library/constants');
 
 describe('Player', function() {
     "use strict";
@@ -43,8 +44,8 @@ describe('Player', function() {
     it('should save with a color and drum', function(done) {
         var player = new db.models.Player({
             game: game,
-            color: 'red',
-            drum: 'kick'
+            color: constants.PLAYER_COLORS[0],
+            drum: constants.DRUM_KITS[0].drums[0]
         });
         player.save(function(err, player) {
             expect(err).to.be.null;

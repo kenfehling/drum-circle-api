@@ -248,7 +248,7 @@ function getDrum(game, req, callback) {
         callback(null, req.params.drum);
     }
     else {
-        game.getRandomDrum(callback);
+        game.selectRandomDrum(callback);
     }
 }
 
