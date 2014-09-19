@@ -20,12 +20,13 @@ else {
     db.connect('mongodb://localhost/drum-circle');
 }
 
-createOpenSession();
 var server = restify.createServer();
 server.use(restify.CORS());
 server.use(restify.fullResponse());
 //server.use(restify.gzipResponse());
 server.use(restify.bodyParser());
+
+createOpenSession();
 
 /**
  * Get games
