@@ -8,8 +8,8 @@
 var mongoose = require('mongoose');
 var autoIncrement = require('mongoose-auto-increment');
 var constants = require('drum-circle-library/constants');
-var Game = require('../models/Game');
-var Player = require('../models/Player');
+var Game = require('../models/game');
+var Player = require('../models/player');
 
 function connect(url) {
     "use strict";
