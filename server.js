@@ -78,10 +78,11 @@ server.patch('/games/:code', function(req, res) {
     var _id = req.params.code;
     db.models.Game.findById(_id, function(err, game) {
         if (game) {
-            game.tempo = req.params.tempo;
-            game.drum_kit = req.params.drum_kit;
-            if (req.params.running) {
+            setParamIfGiven(game, req, 'tempo');
+            setParamIfGiven(game, req, 'drum_kit');
+            if (req.params.running && !game.running) {
                 game.running = req.params.running;
+                game.start_time = new Date().getTime();
             }
             game.save(function(err, game) {
                 if (err) {
@@ -265,5 +266,12 @@ function createOpenSession() {
         }
     });
 }
+
+function setParamIfGiven(game, req, paramName) {
+    "use strict";
+    if (req.params[paramName]) {
+        game[paramName] = req.params[paramName];
+    }
+};
 
 module.exports = server;

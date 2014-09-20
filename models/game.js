@@ -24,6 +24,7 @@ var gameSchema = new Schema({
         required: true,
         default: false
     },
+    start_time: Number,  // milliseconds since Jan 1, 1970
     drum_kit: String,
     tempo: Number
 });
