@@ -261,7 +261,15 @@ function createOpenSession() {
                 _id: constants.OPEN_SESSION_CODE
             });
             openSession.save(function(err, game) {
-                if (err) {
+                if (game) {
+                    game.start_time = new Date().getTime();
+                    game.save(function(err, game) {
+                        if (err) {
+                            console.error(err.toString());
+                        }
+                    });
+                }
+                else if (err) {
                     console.error(err.toString());
                 }
             });
