@@ -30,6 +30,17 @@ describe('server', function () {
             });
         });
     });
+
+    describe('/games/' + constants.OPEN_SESSION_CODE + ' endpoint', function() {
+        it('returns open session game', function (done) {
+            hippie(server)
+                .json()
+                .get('/games/' + constants.OPEN_SESSION_CODE)
+                .expectStatus(200)
+                .end(done);
+        });
+    });
+
     describe('/games/:code endpoint', function () {
         var gameCode;
         beforeEach(function(done) {

@@ -257,7 +257,9 @@ function createOpenSession() {
     "use strict";
     db.models.Game.findById(constants.OPEN_SESSION_CODE, function (err, game) {
         if (!game) {
-            var openSession = new db.models.Game();
+            var openSession = new db.models.Game({
+                _id: constants.OPEN_SESSION_CODE
+            });
             openSession.save(function(err, game) {
                 if (err) {
                     console.error(err.toString());
