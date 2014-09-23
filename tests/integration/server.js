@@ -4,7 +4,7 @@
  */
 
 /*jshint strict: true */
-/*global require, describe, it, before, beforeEach */
+/*global require, describe, it, context, before, beforeEach */
 
 var hippie = require('hippie');
 var server = require('../../server');
@@ -42,57 +42,62 @@ describe('server', function () {
     });
 
     describe('/games/:code endpoint', function () {
-        var gameCode;
-        beforeEach(function(done) {
-            createGame(function(code) {
-                gameCode = code;
-                done();
+        context('game exists', function() {
+            var code;
+            beforeEach(function(done) {
+                createGame(function(c) {
+                    code = c;
+                    done();
+                });
+            });
+            it('deletes a game', function (done) {
+                hippie(server)
+                    .json()
+                    .del('/games/' + code)
+                    .expectStatus(200)
+                    .end(done);
+            });
+            it('sets game settings', function (done) {
+                hippie(server)
+                    .json()
+                    .patch('/games/' + code)
+                    .send({ tempo: 60 })
+                    .expectStatus(200)
+                    .end(done);
+            });
+            it('sets game settings and starts game', function (done) {
+                hippie(server)
+                    .json()
+                    .patch('/games/' + code)
+                    .send({ tempo: 60, running: true })
+                    .expectStatus(200)
+                    .end(done);
+            });
+            it('returns a game based on the code', function (done) {
+                hippie(server)
+                    .json()
+                    .get('/games/' + code)
+                    .expectStatus(200)
+                    .end(done);
             });
         });
-        it('deletes a game', function (done) {
-            hippie(server)
-                .json()
-                .del('/games/' + gameCode)
-                .expectStatus(200)
-                .end(done);
-        });
-        it('sets game settings', function (done) {
-            hippie(server)
-                .json()
-                .patch('/games/' + gameCode)
-                .send({ tempo: 60 })
-                .expectStatus(200)
-                .end(done);
-        });
-        it('sets game settings and starts game', function (done) {
-            hippie(server)
-                .json()
-                .patch('/games/' + gameCode)
-                .send({ tempo: 60, running: true })
-                .expectStatus(200)
-                .end(done);
-        });
-        it('does not set game settings if game does not exist', function (done) {
-            hippie(server)
-                .json()
-                .patch('/games/blahhh')
-                .send({ tempo: 60 })
-                .expectStatus(404)
-                .end(done);
-        });
-        it('returns a game based on the code', function (done) {
-            hippie(server)
-                .json()
-                .get('/games/' + gameCode)
-                .expectStatus(200)
-                .end(done);
-        });
-        it('returns an error if game does not exist', function (done) {
-            hippie(server)
-                .json()
-                .get('/games/blahhh')
-                .expectStatus(404)
-                .end(done);
+        context('game does not exist', function() {
+            var code = 'blahhhh';
+            it('returns an error', function (done) {
+                hippie(server)
+                    .json()
+                    .get('/games/' + code)
+                    .expectStatus(404)
+                    .end(done);
+            });
+            it('does not set game settings', function (done) {
+                hippie(server)
+                    .json()
+                    .patch('/games/' + code)
+                    .send({ tempo: 60 })
+                    .expectStatus(404)
+                    .end(done);
+            });
         });
     });
     describe('/games/:code/players endpoint', function () {
@@ -110,12 +115,15 @@ describe('server', function () {
                 .expectStatus(201)
                 .end(done);
         });
-        it('does not add a player if game does not exist', function (done) {
-            hippie(server)
-                .json()
-                .post('/games/blahhh/players')
-                .expectStatus(404)
-                .end(done);
+        context('game does not exist', function() {
+            var code = 'blahhhh';
+            it('does not add a player', function (done) {
+                hippie(server)
+                    .json()
+                    .post('/games/' + code + '/players')
+                    .expectStatus(404)
+                    .end(done);
+            });
         });
     });
     describe('/games/:code/:color/:effect endpoint', function () {
@@ -133,12 +141,15 @@ describe('server', function () {
                 .expectStatus(200)
                 .end(done);
         });
-        it('does not send effect if game does not exist', function (done) {
-            hippie(server)
-                .json()
-                .post('/games/blahhh/red/bitcrush')
-                .expectStatus(404)
-                .end(done);
+        context('game does not exist', function() {
+            var code = 'blahhhh';
+            it('does not send effect', function (done) {
+                hippie(server)
+                    .json()
+                    .post('/games/' + code + '/red/bitcrush')
+                    .expectStatus(404)
+                    .end(done);
+            });
         });
     });
 });
