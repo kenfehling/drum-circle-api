@@ -269,7 +269,13 @@ function createOpenSession() {
             });
             openSession.save(function(err, game) {
                 if (game) {
-                    game.start_time = new Date().getTime();
+                    game.start_time = time_utils.calculateNextCycleTime({
+                        clientTime: new Date().getTime(),
+                        timeDifference: 0,  // No difference because it's the server
+                        beatDuration: 1000,
+                        beatsPerMeasure: 4,
+                        measuresInCycle: 1
+                    });
                     game.save(function(err, game) {
                         if (err) {
                             console.error(err.toString());
