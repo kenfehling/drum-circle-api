@@ -130,7 +130,7 @@ describe('server', function () {
             hippie(server)
                 .json()
                 .post('/games/' + gameCode + '/red/bitcrush')
-                .expectStatus(204)
+                .expectStatus(200)
                 .end(done);
         });
         it('does not send effect if game does not exist', function (done) {

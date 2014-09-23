@@ -207,7 +207,7 @@ server.post('/games/:code/:color/:effect', function(req, res) {
                 var data = { color: color, effect: effect };
                 Fanout.send(_id, event, data, function(result, response) {
                     if (response.statusCode < 300) {
-                        res.send(204);
+                        res.send(200, {});
                     } else {
                         res.send(response.statusCode, result);
                     }
