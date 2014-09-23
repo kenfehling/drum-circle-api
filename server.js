@@ -9,6 +9,7 @@
 var restify = require('restify');
 var mongoose = require('mongoose');
 var constants = require('drum-circle-library/constants');
+var time_utils = require('drum-circle-library/time_utils');
 var Fanout = require('./services/fanout');
 var db = require('./services/database');
 
@@ -82,7 +83,13 @@ server.patch('/games/:code', function(req, res) {
             setParamIfGiven(game, req, 'drum_kit');
             if (req.params.running && !game.running) {
                 game.running = req.params.running;
-                game.start_time = new Date().getTime();
+                game.start_time = time_utils.calculateNextCycleTime({
+                    clientTime: new Date().getTime(),
+                    timeDifference: 0,  // No difference because it's the server
+                    beatDuration: 60000 / game.tempo,
+                    beatsPerMeasure: 4,
+                    measuresInCycle: 1
+                });
             }
             game.save(function(err, game) {
                 if (err) {
@@ -282,6 +289,6 @@ function setParamIfGiven(game, req, paramName) {
     if (req.params[paramName]) {
         game[paramName] = req.params[paramName];
     }
-};
+}
 
 module.exports = server;
