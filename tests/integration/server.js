@@ -7,8 +7,10 @@
 /*global require, describe, it, context, before, beforeEach */
 
 var hippie = require('hippie');
+var expect = require('chai').expect;
 var server = require('../../server');
 var constants = require('drum-circle-library/constants');
+var test_utils = require('drum-circle-library/test_utils');
 
 describe('server', function () {
     "use strict";
@@ -76,7 +78,11 @@ describe('server', function () {
                     .json()
                     .get('/games/' + code)
                     .expectStatus(200)
-                    .end(done);
+                    .end(function (err, res, body) {
+                        expect(body._id).to.equal(code);
+                        expect(body.running).to.be.false;
+                        done();
+                    });
             });
         });
         context('game does not exist', function() {
@@ -112,7 +118,11 @@ describe('server', function () {
                     .json()
                     .post('/games/' + code + '/players')
                     .expectStatus(201)
-                    .end(done);
+                    .end(function (err, res, body) {
+                        test_utils.exists(body.color);
+                        test_utils.exists(body.drum);
+                        done();
+                    });
             });
         });
         context('game does not exist', function() {

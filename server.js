@@ -99,7 +99,7 @@ server.patch('/games/:code', function(req, res) {
                 else {
                     if (game.running) {
                         var event = constants.EVENTS.GAME_STARTED;
-                        fanout(res, _id, event, game);
+                        fanout(res, _id, event, game._doc);
                     }
                     else {
                         res.send(game);
@@ -181,7 +181,7 @@ server.post('/games/:code/players', function(req, res) {
                                         }
                                         else {
                                             var event = constants.EVENTS.PLAYER_JOIN;
-                                            fanout(res, _id, event, player, 201);
+                                            fanout(res, _id, event, player._doc, 201);
                                         }
                                     });
                                 });
@@ -290,7 +290,7 @@ function fanout(res, channel, event, data, successCode) {
     data = _.extend({ event: event }, data);
     Fanout.send(channel, event, data, function(result, response) {
         if (response.statusCode < 300) {
-            res.send(successCode || 200, {});
+            res.send(successCode || 200, data);
         } else {
             res.send(response.statusCode, result);
         }
