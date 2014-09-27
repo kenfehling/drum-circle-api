@@ -156,39 +156,24 @@ server.post('/games/:code/players', function(req, res) {
         var _id = req.params.code;
         db.models.Game.findById(_id, function(err, game) {
             if (game) {
-                game.checkIfFull(function(err, full) {
-                    if (err) {
-                        res.send(400, err);
-                    }
-                    else {
-                        if (full) {
-                            res.send(403, { error: "Game is full" });
+                if (_id == constants.OPEN_SESSION_CODE) {
+                    playerJoin(req, res, game);
+                }
+                else {
+                    game.checkIfFull(function(err, full) {
+                        if (err) {
+                            res.send(400, err);
                         }
                         else {
-                            getColor(game, req, function(err, color)  {
-                                getDrum(game, req, function(err, drum) {
-                                    var options = {
-                                        game: game,
-                                        color: color,
-                                        drum: drum,
-                                        drum_kit: req.params.drum_kit || game.drum_kit,
-                                        tempo: req.params.tempo || game.tempo
-                                    };
-                                    var player = new db.models.Player(options);
-                                    player.save(function (err, player) {
-                                        if (err) {
-                                            res.send(500, err.toString());
-                                        }
-                                        else {
-                                            var event = constants.EVENTS.PLAYER_JOIN;
-                                            fanout(res, _id, event, player._doc, 201);
-                                        }
-                                    });
-                                });
-                            });
+                            if (full) {
+                                res.send(403, { error: "Game is full" });
+                            }
+                            else {
+                                playerJoin(req, res, game);
+                            }
                         }
-                    }
-                });
+                    });
+                }
             }
             else {
                 res.send(404, { error: "Game '" + _id + "' not found"});
@@ -294,6 +279,31 @@ function fanout(res, channel, event, data, successCode) {
         } else {
             res.send(response.statusCode, result);
         }
+    });
+}
+
+function playerJoin(req, res, game) {
+    "use strict";
+    getColor(game, req, function(err, color)  {
+        getDrum(game, req, function(err, drum) {
+            var options = {
+                game: game,
+                color: color,
+                drum: drum,
+                drum_kit: req.params.drum_kit || game.drum_kit,
+                tempo: req.params.tempo || game.tempo
+            };
+            var player = new db.models.Player(options);
+            player.save(function (err, player) {
+                if (err) {
+                    res.send(500, err.toString());
+                }
+                else {
+                    var event = constants.EVENTS.PLAYER_JOIN;
+                    fanout(res, game._id, event, player._doc, 201);
+                }
+            });
+        });
     });
 }
 

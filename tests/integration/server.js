@@ -6,6 +6,7 @@
 /*jshint strict: true */
 /*global require, describe, it, context, before, beforeEach */
 
+var _ = require('lodash');
 var hippie = require('hippie');
 var expect = require('chai').expect;
 var server = require('../../server');
@@ -25,6 +26,26 @@ describe('server', function () {
             });
     }
 
+    function fillGame(code, done) {
+        var i = 0;
+        function join() {
+            hippie(server)
+                .json()
+                .post('/games/' + code + '/players')
+                .expectStatus(201)
+                .end(function() {
+                    i += 1;
+                    if (i >= constants.PLAYER_COLORS.length) {
+                        done();
+                    }
+                    else {
+                        join();
+                    }
+                });
+        }
+        join();
+    }
+
     describe('/games endpoint', function () {
         it('creates a game', function (done) {
             createGame(function() {
@@ -34,12 +55,25 @@ describe('server', function () {
     });
 
     describe('/games/' + constants.OPEN_SESSION_CODE + ' endpoint', function() {
+        var code = constants.OPEN_SESSION_CODE;
         it('returns open session game', function (done) {
             hippie(server)
                 .json()
-                .get('/games/' + constants.OPEN_SESSION_CODE)
+                .get('/games/' + code)
                 .expectStatus(200)
                 .end(done);
+        });
+        context('game is full', function() {
+            beforeEach(function(done) {
+                fillGame(code, done);
+            });
+            it('joins anyway', function (done) {
+                hippie(server)
+                    .json()
+                    .post('/games/' + code + '/players')
+                    .expectStatus(201)
+                    .end(done);
+            });
         });
     });
 
@@ -113,6 +147,19 @@ describe('server', function () {
                     done();
                 });
             });
+            context('game is full', function() {
+                beforeEach(function(done) {
+                    fillGame(code, done);
+                });
+                it('returns an error', function (done) {
+                    hippie(server)
+                        .json()
+                        .post('/games/' + code + '/players')
+                        .expectStatus(403)
+                        .end(done);
+                });
+            });
+
             it('adds a player', function (done) {
                 hippie(server)
                     .json()
