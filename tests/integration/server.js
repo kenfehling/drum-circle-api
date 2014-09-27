@@ -1,5 +1,5 @@
 /**
- * Integration tests for server
+ * Integration tests for API server
  * Author: Ken Fehling
  */
 
@@ -57,19 +57,17 @@ describe('server', function () {
                     .expectStatus(200)
                     .end(done);
             });
-            it('sets game settings', function (done) {
-                hippie(server)
-                    .json()
-                    .patch('/games/' + code)
-                    .send({ tempo: 60 })
-                    .expectStatus(200)
-                    .end(done);
-            });
             it('sets game settings and starts game', function (done) {
                 hippie(server)
                     .json()
                     .patch('/games/' + code)
-                    .send({ tempo: 60, running: true })
+                    .send({
+                        data: {
+                            tempo: 60,
+                            drum_kit: constants.DRUM_KITS[0].name,
+                            running: 1
+                        }
+                    })
                     .expectStatus(200)
                     .end(done);
             });
@@ -101,19 +99,21 @@ describe('server', function () {
         });
     });
     describe('/games/:code/players endpoint', function () {
-        var gameCode;
-        beforeEach(function(done) {
-            createGame(function(code) {
-                gameCode = code;
-                done();
+        context('game exists', function() {
+            var code;
+            beforeEach(function(done) {
+                createGame(function(c) {
+                    code = c;
+                    done();
+                });
             });
-        });
-        it('adds a player if neccesary data is given', function (done) {
-            hippie(server)
-                .json()
-                .post('/games/' + gameCode + '/players')
-                .expectStatus(201)
-                .end(done);
+            it('adds a player', function (done) {
+                hippie(server)
+                    .json()
+                    .post('/games/' + code + '/players')
+                    .expectStatus(201)
+                    .end(done);
+            });
         });
         context('game does not exist', function() {
             var code = 'blahhhh';

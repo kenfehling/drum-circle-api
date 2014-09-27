@@ -6,6 +6,7 @@
 /*jshint strict: true */
 /*global require, module, exports, console, process */
 
+var _ = require('lodash');
 var restify = require('restify');
 var mongoose = require('mongoose');
 var constants = require('drum-circle-library/constants');
@@ -98,13 +99,7 @@ server.patch('/games/:code', function(req, res) {
                 else {
                     if (game.running) {
                         var event = constants.EVENTS.GAME_STARTED;
-                        Fanout.send(_id, event, game, function(result, response) {
-                            if (response.statusCode < 300) {
-                                res.send(game);
-                            } else {
-                                res.send(response.statusCode, result + " (Fanout)");
-                            }
-                        });
+                        fanout(res, _id, event, game);
                     }
                     else {
                         res.send(game);
@@ -113,7 +108,7 @@ server.patch('/games/:code', function(req, res) {
             });
         }
         else {
-            res.send(404, { error: "db.models.Game '" + _id + "' not found"});
+            res.send(404, { error: "Game '" + _id + "' not found"});
         }
     });
 });
@@ -161,36 +156,42 @@ server.post('/games/:code/players', function(req, res) {
         var _id = req.params.code;
         db.models.Game.findById(_id, function(err, game) {
             if (game) {
-                getColor(game, req, function(err, color)  {
-                    getDrum(game, req, function(err, drum) {
-                        var options = {
-                            game: game,
-                            color: color,
-                            drum: drum,
-                            drum_kit: req.params.drum_kit || game.drum_kit,
-                            tempo: req.params.tempo || game.tempo
-                        };
-                        var player = new db.models.Player(options);
-                        player.save(function(err, player) {
-                            if (err) {
-                                res.send(500, err.toString());
-                            }
-                            else {
-                                var event = constants.EVENTS.PLAYER_JOIN;
-                                Fanout.send(_id, event, player, function(result, response) {
-                                    if (response.statusCode < 300) {
-                                        res.send(201, player);
-                                    } else {
-                                        res.send(response.statusCode, result + " (Fanout)");
-                                    }
+                game.checkIfFull(function(err, full) {
+                    if (err) {
+                        res.send(400, err);
+                    }
+                    else {
+                        if (full) {
+                            res.send(403, { error: "Game is full" });
+                        }
+                        else {
+                            getColor(game, req, function(err, color)  {
+                                getDrum(game, req, function(err, drum) {
+                                    var options = {
+                                        game: game,
+                                        color: color,
+                                        drum: drum,
+                                        drum_kit: req.params.drum_kit || game.drum_kit,
+                                        tempo: req.params.tempo || game.tempo
+                                    };
+                                    var player = new db.models.Player(options);
+                                    player.save(function (err, player) {
+                                        if (err) {
+                                            res.send(500, err.toString());
+                                        }
+                                        else {
+                                            var event = constants.EVENTS.PLAYER_JOIN;
+                                            fanout(res, _id, event, player, 201);
+                                        }
+                                    });
                                 });
-                            }
-                        });
-                    });
+                            });
+                        }
+                    }
                 });
             }
             else {
-                res.send(404, { error: "db.models.Game '" + _id + "' not found"});
+                res.send(404, { error: "Game '" + _id + "' not found"});
             }
         });
     }
@@ -212,16 +213,10 @@ server.post('/games/:code/:color/:effect', function(req, res) {
             if (game) {
                 var event = constants.EVENTS.EFFECT_RECEIVE;
                 var data = { color: color, effect: effect };
-                Fanout.send(_id, event, data, function(result, response) {
-                    if (response.statusCode < 300) {
-                        res.send(200, {});
-                    } else {
-                        res.send(response.statusCode, result);
-                    }
-                });
+                fanout(res, _id, event, data);
             }
             else {
-                res.send(404, { error: "db.models.Game '" + _id + "' not found"});
+                res.send(404, { error: "Game '" + _id + "' not found" });
             }
         });
     }
@@ -271,7 +266,7 @@ function createOpenSession() {
                 if (game) {
                     game.start_time = time_utils.calculateNextCycleTime({
                         clientTime: new Date().getTime(),
-                        timeDifference: 0,  // No difference because it's the server
+                        timeDifference: 0,  // No difference (it's the server)
                         beatDuration: 1000,
                         beatsPerMeasure: 4,
                         measuresInCycle: 1
@@ -286,6 +281,18 @@ function createOpenSession() {
                     console.error(err.toString());
                 }
             });
+        }
+    });
+}
+
+function fanout(res, channel, event, data, successCode) {
+    "use strict";
+    data = _.extend({ event: event }, data);
+    Fanout.send(channel, event, data, function(result, response) {
+        if (response.statusCode < 300) {
+            res.send(successCode || 200, {});
+        } else {
+            res.send(response.statusCode, result);
         }
     });
 }

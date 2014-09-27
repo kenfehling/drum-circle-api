@@ -57,6 +57,13 @@ gameSchema.methods.selectRandomDrum = function(cb) {
     });
 };
 
+gameSchema.methods.checkIfFull = function (cb) {
+    "use strict";
+    mongoose.models.Player.count({ game: this._id }, function(err, count) {
+        cb(err, count >= constants.PLAYER_COLORS.length);
+    });
+};
+
 gameSchema.methods.getNumPlayers = function (cb) {
     "use strict";
     mongoose.models.Player.count({ game: this._id }, cb);
