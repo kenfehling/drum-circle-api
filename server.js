@@ -10,6 +10,7 @@ var _ = require('lodash');
 var restify = require('restify');
 var mongoose = require('mongoose');
 var constants = require('drum-circle-library/constants');
+var utils = require('drum-circle-library/utils');
 var time_utils = require('drum-circle-library/time_utils');
 var Fanout = require('./services/fanout');
 var db = require('./services/database');
@@ -29,6 +30,12 @@ server.use(restify.fullResponse());
 server.use(restify.bodyParser());
 
 createOpenSession();
+
+function isOpenSession(_id) {
+    /* jshint ignore:start */
+    return _id == constants.OPEN_SESSION_CODE;
+    /* jshint ignore:end */
+}
 
 /**
  * Get games
@@ -80,8 +87,8 @@ server.patch('/games/:code', function(req, res) {
     var _id = req.params.code;
     db.models.Game.findById(_id, function(err, game) {
         if (game) {
-            setParamIfGiven(game, req, 'tempo');
-            setParamIfGiven(game, req, 'drum_kit');
+            utils.copyParamIfDefined('tempo', req.params, game);
+            utils.copyParamIfDefined('drum_kit', req.params, game);
             if (req.params.running && !game.running) {
                 game.running = req.params.running;
                 game.start_time = time_utils.calculateNextCycleTime({
@@ -99,7 +106,8 @@ server.patch('/games/:code', function(req, res) {
                 else {
                     if (game.running) {
                         var event = constants.EVENTS.GAME_STARTED;
-                        fanout(res, _id, event, game._doc);
+                        var data = _.pick(game._doc, constants.PARAMS);
+                        fanout(res, _id, event, data);
                     }
                     else {
                         res.send(game);
@@ -156,7 +164,8 @@ server.post('/games/:code/players', function(req, res) {
         var _id = req.params.code;
         db.models.Game.findById(_id, function(err, game) {
             if (game) {
-                if (_id == constants.OPEN_SESSION_CODE) {
+
+                if (isOpenSession(_id)) {
                     playerJoin(req, res, game);
                 }
                 else {
@@ -286,13 +295,12 @@ function playerJoin(req, res, game) {
     "use strict";
     getColor(game, req, function(err, color)  {
         getDrum(game, req, function(err, drum) {
-            var options = {
-                game: game,
-                color: color,
-                drum: drum,
-                drum_kit: req.params.drum_kit || game.drum_kit,
-                tempo: req.params.tempo || game.tempo
-            };
+            var options = {};
+            options.game = game;
+            options.color = color;
+            options.drum = drum;
+            utils.copyParamIfDefined('drum_kit', req.params, options);
+            utils.copyParamIfDefined('tempo', req.params, options);
             var player = new db.models.Player(options);
             player.save(function (err, player) {
                 if (err) {
@@ -300,18 +308,12 @@ function playerJoin(req, res, game) {
                 }
                 else {
                     var event = constants.EVENTS.PLAYER_JOIN;
-                    fanout(res, game._id, event, player._doc, 201);
+                    var data = _.pick(player._doc, constants.PARAMS);
+                    fanout(res, game._id, event, data, 201);
                 }
             });
         });
     });
-}
-
-function setParamIfGiven(game, req, paramName) {
-    "use strict";
-    if (req.params[paramName]) {
-        game[paramName] = req.params[paramName];
-    }
 }
 
 module.exports = server;

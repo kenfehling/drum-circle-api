@@ -44,8 +44,8 @@ describe('Player', function() {
     it('should save with a color and drum', function(done) {
         var player = new db.models.Player({
             game: game,
-            color: constants.PLAYER_COLORS[0],
-            drum: constants.DRUM_KITS[0].drums[0]
+            color: 0,
+            drum: 0
         });
         player.save(function(err, player) {
             expect(err).to.be.null;

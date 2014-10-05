@@ -44,8 +44,8 @@ describe('Game', function() {
     it('gets one player when player has joined', function(done) {
         var player = new db.models.Player({
             game: game,
-            color: constants.PLAYER_COLORS[0],
-            drum: constants.DRUM_KITS[0].drums[0]
+            color: 0,
+            drum: 0
         });
         player.save(function(err, player) {
             expect(err).to.be.null;
@@ -60,8 +60,8 @@ describe('Game', function() {
     it('gets a list of drums in use', function(done) {
         var player = new db.models.Player({
             game: game,
-            color: constants.PLAYER_COLORS[0],
-            drum: constants.DRUM_KITS[0].drums[0]
+            color: 0,
+            drum: 0
         });
         player.save(function(err, player) {
             expect(err).to.be.null;
@@ -69,7 +69,7 @@ describe('Game', function() {
             game.getUsedDrums(function(err, drums) {
                 expect(err).to.be.null;
                 expect(drums.length).to.equal(1);
-                expect(drums[0]).to.equal(constants.DRUM_KITS[0].drums[0]);
+                expect(drums[0]).to.equal(0);
                 done();
             });
         });
@@ -78,8 +78,8 @@ describe('Game', function() {
     it('gets a list of drums not in use', function(done) {
         var player = new db.models.Player({
             game: game,
-            color: constants.PLAYER_COLORS[0],
-            drum: constants.DRUM_KITS[0].drums[0]
+            color: 0,
+            drum: 0
         });
         player.save(function(err, player) {
             expect(err).to.be.null;

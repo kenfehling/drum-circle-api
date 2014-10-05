@@ -35,7 +35,7 @@ describe('server', function () {
                 .expectStatus(201)
                 .end(function() {
                     i += 1;
-                    if (i >= constants.PLAYER_COLORS.length) {
+                    if (i >= constants.MAX_PLAYERS) {
                         done();
                     }
                     else {
@@ -98,14 +98,18 @@ describe('server', function () {
                     .json()
                     .patch('/games/' + code)
                     .send({
-                        data: {
-                            tempo: 60,
-                            drum_kit: constants.DRUM_KITS[0].name,
-                            running: 1
-                        }
+                        tempo: 60,
+                        drum_kit: 0,
+                        running: 1
                     })
                     .expectStatus(200)
-                    .end(done);
+                    .end(function (err, res, body) {
+                        expect(body.running).to.be.true;
+                        test_utils.exists(body.start_time);
+                        test_utils.exists(body.drum_kit);
+                        test_utils.exists(body.tempo);
+                        done();
+                    });
             });
             it('returns a game based on the code', function (done) {
                 hippie(server)

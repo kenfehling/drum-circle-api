@@ -17,14 +17,11 @@ var playerSchema = new Schema({
         required: true
     },
     color: {
-        type: String,
+        type: Number,
         required: true
     },
-    drum: {
-        type: String,
-        required: true
-    },
-    drum_kit: String,
+    drum: Number,
+    drum_kit: Number,
     tempo: Number
 });
 
