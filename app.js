@@ -6,6 +6,7 @@
 /*jshint strict: true */
 /*global require, console, process */
 
+require('newrelic');
 var fs = require('fs');
 var server = require('./server');
 var constants = require('drum-circle-library/constants');
