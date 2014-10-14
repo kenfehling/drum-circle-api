@@ -282,12 +282,23 @@ function createOpenSession() {
 function fanout(res, channel, event, data, successCode) {
     "use strict";
     data = _.extend({ event: event }, data);
-    res.send(successCode || 200, data);  // Sends HTTP response first
-    Fanout.send(channel, event, data, function(result, response) {
-        if (response.statusCode >= 300) {
-            console.error(result);
-        }
-    });
+    if (process.env.MONGOLAB_URI) {  // Production
+        res.send(successCode || 200, data);  // Sends HTTP response first
+        Fanout.send(channel, event, data, function (result, response) {
+            if (response.statusCode >= 300) {
+                console.error(result);
+            }
+        });
+    }
+    else {  // Development (and tests)
+        Fanout.send(channel, event, data, function(result, response) {
+            if (response.statusCode < 300) {
+                res.send(successCode || 200, data);
+            } else {
+                res.send(response.statusCode, result);
+            }
+        });
+    }
 }
 
 function playerJoin(req, res, game) {
