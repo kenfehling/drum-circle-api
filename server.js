@@ -282,6 +282,8 @@ function createOpenSession() {
 function fanout(res, channel, event, data, successCode) {
     "use strict";
     data = _.extend({ event: event }, data);
+
+    //TODO: Replace with a better check for production/development
     if (process.env.MONGOLAB_URI) {  // Production
         res.send(successCode || 200, data);  // Sends HTTP response first
         Fanout.send(channel, event, data, function (result, response) {
