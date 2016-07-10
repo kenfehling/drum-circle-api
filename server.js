@@ -16,8 +16,8 @@ var Fanout = require('./services/fanout');
 var db = require('./services/database');
 
 // Use different URL for development and production
-if (process.env.MONGOLAB_URI) {
-    db.connect(process.env.MONGOLAB_URI);
+if (process.env.MONGODB_URI) {
+    db.connect(process.env.MONGODB_URI);
 }
 else {
     db.connect('mongodb://localhost/drum-circle');
